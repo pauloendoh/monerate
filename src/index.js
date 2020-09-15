@@ -3,11 +3,24 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import { combineReducers, createStore } from 'redux';
+import authReducer from './redux/authReducer'
+import { Provider } from 'react-redux'
+import { BrowserRouter } from 'react-router-dom';
+
+const rootReducer = combineReducers({
+  auth: authReducer
+})
+
+const store = createStore(rootReducer)
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <Provider store={store}>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </Provider>
+  ,
   document.getElementById('root')
 );
 
