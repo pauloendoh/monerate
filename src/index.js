@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { combineReducers, createStore } from 'redux';
-import authReducer from './redux/authReducer'
+import authReducer from './redux/reducers/authReducer'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom';
 
