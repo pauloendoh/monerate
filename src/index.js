@@ -7,12 +7,15 @@ import { combineReducers, createStore } from 'redux';
 import authReducer from './redux/reducers/authReducer'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom';
+import axios from 'axios'
 
 const rootReducer = combineReducers({
   auth: authReducer
 })
 
 const store = createStore(rootReducer)
+
+axios.defaults.baseURL = 'https://monerate-3a2a5.firebaseio.com/'
 
 ReactDOM.render(
   <Provider store={store}>
