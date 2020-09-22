@@ -3,18 +3,24 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { combineReducers, createStore } from 'redux';
+import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
 import authReducer from './redux/reducers/authReducer'
 import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom';
 import axios from 'axios'
+import expensesReducer from './redux/reducers/expensesReducer';
+import thunk from 'redux-thunk';
+
+const composeEnhancers = process.env.NODE_ENV === 'development' ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ : null || compose;
 
 const rootReducer = combineReducers({
-  auth: authReducer
+  auth: authReducer,
+  expenses: expensesReducer
 })
 
-const store = createStore(rootReducer)
-
+const store = createStore(rootReducer, composeEnhancers(
+  applyMiddleware(thunk)
+));
 axios.defaults.baseURL = 'https://monerate-3a2a5.firebaseio.com/'
 
 ReactDOM.render(

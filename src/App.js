@@ -3,12 +3,15 @@ import './App.css';
 import { connect } from 'react-redux';
 
 import { withRouter } from 'react-router-dom';
-import actions from './redux/actions';
+import actions from './redux/actions/actionTypes';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import Axios from 'axios';
 import { Button, makeStyles, Modal } from '@material-ui/core';
 import AddExpenseModal from './containers/AddExpenseModal/AddExpenseModal';
-
+import axios from 'axios'
+import ExpenseList from './containers/ExpenseList/ExpenseList';
+import ExpenseFilter from './containers/ExpenseFilter/ExpenseFilter';
+import expensesActions from './redux/actions/expensesActions';
 
 
 const App = (props) => {
@@ -16,11 +19,19 @@ const App = (props) => {
   const [isSignUp, setIsSignUp] = useState(false)
   const [modalIsOpen, setModalIsOpen] = useState(false)
 
+  const [expenses, setExpenses] = useState([])
+  const [isLoadingExpenses, setIsLoadingExpenses] = useState(false)
+
   useEffect(() => {
     props.CHECK_USER_OR_LOGOUT()
   }, [])
 
-
+  useEffect(() => {
+    if (props.authUser) {
+      props.fetchAllExpenses(props.authUser)
+    }
+    
+  }, [props.authUser])
 
   return (
     <div className="App">
@@ -36,6 +47,9 @@ const App = (props) => {
               open={modalIsOpen}
               onClose={() => setModalIsOpen(false)}
             />
+
+            <ExpenseFilter/>
+            <ExpenseList expenses={props.filteredExpenses} />
           </div>)
           :
           (<div>
@@ -104,24 +118,7 @@ const App = (props) => {
             </div>
           </div>)
       }
-
-
-      {/* <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header> */}
-
-
+      
     </div >
 
   );
@@ -129,7 +126,10 @@ const App = (props) => {
 
 const mapStateToProps = state => {
   return {
-    authUser: state.auth.user
+    authUser: state.auth.user,
+
+    expenses: state.expenses.expenses,
+    filteredExpenses: state.expenses.filteredExpenses,
   }
 }
 
@@ -139,6 +139,7 @@ const mapDispatchToProps = dispatch => {
     CHECK_USER_OR_LOGOUT: () => dispatch({ type: actions.CHECK_USER_OR_LOGOUT }),
     LOGOUT: () => dispatch({ type: actions.LOGOUT }),
 
+    fetchAllExpenses: (authUser) => dispatch(expensesActions.fetchAllExpenses(authUser))
   }
 }
 

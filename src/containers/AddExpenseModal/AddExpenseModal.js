@@ -68,10 +68,13 @@ const AddExpenseModal = (props) => {
 
                     let postData = {
                         ...values, 
-                        value: Number(values.value)
+                        value: Number(values.value), 
+
+                        userId: props.authUser.localId, 
+                        createdAt: new Date().toJSON()
                     }
 
-                    axios.post('/expenses.json?auth=' + props.token, postData)
+                    axios.post('/expenses.json?auth=' + props.authUser.idToken, postData)
                         .then(res => { alert('success?', res) })
                         .catch(err => { alert('error', err) })
                         .finally(() => {
@@ -109,6 +112,7 @@ const AddExpenseModal = (props) => {
 
 const mapStateToProps = state => {
     return {
+        authUser: state.auth.user,
         token: state.auth.user.idToken
     }
 }
