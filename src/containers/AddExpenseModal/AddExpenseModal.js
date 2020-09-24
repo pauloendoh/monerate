@@ -1,10 +1,11 @@
 import { makeStyles, Modal } from '@material-ui/core';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import * as Yup from 'yup';
 import CurrencyInput from 'react-currency-masked-input'
 import axios from 'axios'
 import { connect } from 'react-redux';
+import StarRatings from 'react-star-ratings'
 
 function rand() {
     return Math.round(Math.random() * 20) - 10;
@@ -38,7 +39,13 @@ const AddExpenseModal = (props) => {
     // getModalStyle is not a pure function, we roll the style only on the first render
     const [modalStyle] = React.useState(getModalStyle);
 
-
+    const [rating, setRating] = useState(0)
+    const changeRatingHandler = (newRating, name) => {
+      if (rating === newRating)
+        setRating(0)
+      else
+        setRating(newRating)
+    }
 
     return (<Modal
         open={props.open}
@@ -69,6 +76,7 @@ const AddExpenseModal = (props) => {
                     let postData = {
                         ...values, 
                         value: Number(values.value), 
+                        rating,
 
                         userId: props.authUser.localId, 
                         createdAt: new Date().toJSON()
@@ -88,10 +96,12 @@ const AddExpenseModal = (props) => {
                         <Field name="expenseName" />
                         <ErrorMessage name="expenseName" component="div" />
 
-                        <Field type="number" name="rating" />
-                        <ErrorMessage name="rating" component="div" />
-
-
+                        <StarRatings
+              starDimension="24px"
+              starSpacing="0"
+              rating={rating}
+              starRatedColor="orange"
+              changeRating={changeRatingHandler} />
                         <CurrencyInput
                             name="value"
                             onChange={(e, maskedValue) =>

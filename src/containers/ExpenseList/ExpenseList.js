@@ -1,12 +1,16 @@
 import React from 'react'
+import StarRatings from 'react-star-ratings'
 
 const ExpenseList = (props) => {
 
     return (
         <div>
             {props.expenses.map(expense => {
+                if (!expense.rating)
+                    expense.rating = 0
+                
                 return (
-                    <div key={expense.id} className="expense" style={{display: "flex"}}>
+                    <div key={expense.id} className="expense" style={{ display: "flex" }}>
                         <div>
                             {expense.expenseName}
                         </div>
@@ -14,7 +18,13 @@ const ExpenseList = (props) => {
                             {expense.value}
                         </div>
                         <div>
-                            {expense.rating}
+                            Rating: 
+                                <StarRatings
+                                    starDimension="24px"
+                                    starSpacing="0"
+                                    rating={expense.rating}
+                                    starRatedColor="orange"
+                                /> 
                         </div>
                         <div>
                             {expense.createdAt}
