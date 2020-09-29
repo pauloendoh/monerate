@@ -1,0 +1,19 @@
+.modal {
+    display: flex !important;
+    align-items: flex-start !important;
+    margin-top: 200px;
+    justify-content: center !important;
+}
+
+.modal-div {
+    position: 'absolute';
+    background: white;
+    width: 800px;
+    outline: none;
+}
+
+.star-ratings-outer-div {
+    display: inline-flex;
+    flex-direction: column;
+    width: 150px
+}

@@ -6,13 +6,25 @@ const expensesActions = {
     return dispatch => {
       axios.get('/expenses.json?auth=' + authUser.idToken + '&orderBy="userId"&equalTo="' + authUser.localId + '"')
         .then(res => {
-          const expenses = []
+          let expenses = []
           for (let key in res.data) {
             expenses.push({
               ...res.data[key],
               id: key
             })
           }
+
+          // sorting by date...
+          expenses = expenses.sort((a, b) => {
+         
+            if (a.createdAt !== undefined && b.createdAt !== undefined) {
+              return new Date(b.createdAt) - new Date(a.createdAt) 
+            }
+            else {
+              return 1
+            }
+          })
+
 
           dispatch({
             type: actionTypes.SET_EXPENSES,

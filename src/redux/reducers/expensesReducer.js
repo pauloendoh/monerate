@@ -25,25 +25,14 @@ const expensesReducer = (state = initialState, action) => {
             const filter = action.filter;
 
             if (filter.name.length) {
-                fExpenses = fExpenses.filter(e => e.expenseName.includes(filter.name))
+                fExpenses = fExpenses.filter(e => e.expenseName.toLowerCase().includes(filter.name.toLowerCase()))
             }
 
-            if (filter.initialValue !== '' && filter.endValue !== '') {
-                if (filter.initialValue <= filter.endValue) {
-                    fExpenses = fExpenses.filter(e => {
-                        return (filter.initialValue <= e.value && e.value <= filter.endValue)
-                    })
-                }
+            fExpenses = fExpenses.filter(e => {
+                return (filter.valueRange[0] <= e.value && e.value <= filter.valueRange[1])
+            })
+
     
-                if (filter.initialValue >= filter.endValue) {
-                    fExpenses = fExpenses.filter(e => {
-                        return (filter.initialValue >= e.value && e.value >= filter.endValue)
-                    })
-                }
-            }
-           
-
-
             if (filter.ratingGTE) {
                 fExpenses = fExpenses.filter(e => e.rating >= filter.ratingGTE)
             }

@@ -1,130 +1,97 @@
-import { makeStyles, Modal } from '@material-ui/core';
-import { ErrorMessage, Field, Form, Formik } from 'formik';
+import { Button, Modal, TextField } from '@material-ui/core';
+import { ErrorMessage, Form, Formik } from 'formik';
 import React, { useState } from 'react';
 import * as Yup from 'yup';
-import CurrencyInput from 'react-currency-masked-input'
 import axios from 'axios'
 import { connect } from 'react-redux';
 import StarRatings from 'react-star-ratings'
-
-function rand() {
-    return Math.round(Math.random() * 20) - 10;
-}
-
-function getModalStyle() {
-    const top = 50 + rand();
-    const left = 50 + rand();
-
-    return {
-        top: `${top}%`,
-        left: `${left}%`,
-        transform: `translate(-${top}%, -${left}%)`,
-    };
-}
-
-const useStyles = makeStyles((theme) => ({
-    paper: {
-        position: 'absolute',
-        width: 400,
-        backgroundColor: theme.palette.background.paper,
-        border: '2px solid #000',
-        boxShadow: theme.shadows[5],
-        padding: theme.spacing(2, 4, 3),
-    },
-}));
-
-// ------------------------------------
-const AddExpenseModal = (props) => {
-    const classes = useStyles();
-    // getModalStyle is not a pure function, we roll the style only on the first render
-    const [modalStyle] = React.useState(getModalStyle);
-
-    const [rating, setRating] = useState(0)
-    const changeRatingHandler = (newRating, name) => {
-      if (rating === newRating)
-        setRating(0)
-      else
-        setRating(newRating)
-    }
-
-    return (<Modal
-        open={props.open}
-        onClose={props.onClose}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-    >
-        <div style={modalStyle} className={classes.paper}>
-            <h2 id="simple-modal-title">Text in a modal</h2>
-            <p id="simple-modal-description">
-                Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-            </p>
-            <Formik
-                initialValues={{
-                    expenseName: '',
-                    rating: '',
-                    value: null
-                }}
-
-                validationSchema={Yup.object({
-                    expenseName: Yup.string().required('Required'),
-                    rating: Yup.number().min(1).max(5),
-                    value: Yup.number()
-                })}
-
-                onSubmit={(values, { setSubmitting }) => {
-
-                    let postData = {
-                        ...values, 
-                        value: Number(values.value), 
-                        rating,
-
-                        userId: props.authUser.localId, 
-                        createdAt: new Date().toJSON()
-                    }
-
-                    axios.post('/expenses.json?auth=' + props.authUser.idToken, postData)
-                        .then(res => { alert('success?', res) })
-                        .catch(err => { alert('error', err) })
-                        .finally(() => {
-                            setSubmitting(false)
-                        })
-                }}
-
-            >
-                {({ isSubmitting, values, setFieldValue }) => (
-                    <Form>
-                        <Field name="expenseName" />
-                        <ErrorMessage name="expenseName" component="div" />
-
-                        <StarRatings
-              starDimension="24px"
-              starSpacing="0"
-              rating={rating}
-              starRatedColor="orange"
-              changeRating={changeRatingHandler} />
-                        <CurrencyInput
-                            name="value"
-                            onChange={(e, maskedValue) =>
-                                setFieldValue('value', maskedValue)
-                            }
-                        />
-                        <ErrorMessage name="value" component="div" />
-
-                        {values.value}
-                        <button type="submit"  disabled={isSubmitting}>Save
-                  </button>
-                    </Form>
-                )}
-            </Formik>
-        </div>
-    </Modal>)
-}
+import CurrencyTextField from '@unicef/material-ui-currency-textfield'
+import './AddExpenseModal.css'
 
 const mapStateToProps = state => {
     return {
+        // authUser instead of 
         authUser: state.auth.user,
-        token: state.auth.user.idToken
     }
+}
+
+const AddExpenseModal = (props) => {
+    const [ratingStarsVal, setRatingStarsVal] = useState(0)
+
+    // PE 2/3 
+    const changeRatingHandler = (newRating) => {
+        setRatingStarsVal(ratingStarsVal === newRating ? 0 : newRating)
+    }
+
+    const formikValues = { expenseName: '', expenseValue: 0 }
+    const validationSchema = Yup.object({ expenseName: Yup.string().required('Required') })
+
+    const submitHandler = (formikValues, setSubmitting) => {
+        const valueInNumber = (typeof (formikValues.expenseValue) == 'number' ? formikValues.expenseValue : Number(formikValues.expenseValue.replaceAll(',', '')))
+
+        const postData = {
+            ...formikValues,
+            value: valueInNumber,
+            rating: ratingStarsVal,
+            userId: props.authUser.localId,
+            createdAt: new Date().toJSON()
+        }
+
+        axios.post('/expenses.json?auth=' + props.authUser.idToken, postData)
+            .then(res => { alert('success?', res) })
+            .catch(err => { alert('error', err) })
+            .finally(() => {
+                setSubmitting(false)
+            })
+    }
+
+    // ================== TEMPLATE ========================
+    return (
+        <Modal onClose={props.onClose} open={props.open} className="modal">
+            <div className="modal-div shadow-sm py-3 px-4 rounded">
+                <h4>Add Expense</h4>
+
+                <Formik initialValues={formikValues} validationSchema={validationSchema}
+                    onSubmit={(formikValues, { setSubmitting }) => {
+                        submitHandler(formikValues, setSubmitting)
+                    }}
+                >
+                    {({ isSubmitting, handleChange }) => (
+                        <Form>
+                            <TextField id="expenseName" name="expenseName" label="Name"
+                                onChange={handleChange} required className="mr-3 mt-3"
+                                variant="outlined" size="small" autoComplete="off"
+                                placeholder="Food, bills, clothing..."
+                            />
+
+
+                            <CurrencyTextField
+                                id="expenseValue" name="expenseValue" label="Value" variant="outlined"
+                                size="small" autoComplete="off" className="mr-3 mt-3"
+                                onChange={handleChange} currencySymbol="$" outputFormat="number"
+                                decimalCharacter="." digitGroupSeparator=","
+                            />
+
+                            <div className="star-ratings-outer-div">
+                                <label className="mb-0" style={{ color: 'gray' }}>Rating</label>
+                                <div className="d-flex align-items-end">
+                                    <StarRatings id="star-ratings-input" rating={ratingStarsVal}
+                                        changeRating={changeRatingHandler} starDimension="24px"
+                                        starSpacing="0" starHoverColor="#169F8D"
+                                        starRatedColor="#169F8D" className="star-ratings-div mr-2" />
+                                    {ratingStarsVal ? <div>{ratingStarsVal}</div> : null}
+                                </div>
+                            </div>
+
+                            <div className="mt-3 d-flex justify-content-end">
+                                <ErrorMessage name="expenseName" component="div" />
+                                <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>Save</Button>
+                            </div>
+                        </Form>
+                    )}
+                </Formik>
+            </div>
+        </Modal>)
 }
 
 export default connect(mapStateToProps, null)(AddExpenseModal)

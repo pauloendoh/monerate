@@ -10,6 +10,7 @@ import { BrowserRouter } from 'react-router-dom';
 import axios from 'axios'
 import expensesReducer from './redux/reducers/expensesReducer';
 import thunk from 'redux-thunk';
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 const composeEnhancers = process.env.NODE_ENV === 'development' ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ : null || compose;
 
